@@ -1,4 +1,4 @@
-import { User, Category, CategoryAttribute, Listing, ListingAttribute, ListingImage, Comment, Review, Conversation } from '../types';
+import { User, Category, CategoryAttribute, Listing, Comment, Review, Conversation, Message, SavedSearch } from '../types';
 
 // Mock Users
 export const mockUsers: User[] = [
@@ -514,4 +514,136 @@ export function searchListings(params: SearchParams): Listing[] {
 
 export function addListing(listing: Listing) {
   mockListings.unshift(listing);
+}
+
+// ---------------------------------------------------------------------------
+// Signed-in user (mock). A real app would resolve this from the auth session.
+// ---------------------------------------------------------------------------
+export const currentUser: User = mockUsers[4];
+
+// Mock saved searches for the current user (Phase 2/4 "alerts" feature).
+export const mockSavedSearches: SavedSearch[] = [
+  {
+    id: 'ss-1',
+    user_id: currentUser.id,
+    query: 'Thunderfury',
+    filters: { category_id: 'cat-weapons', rarity: ['Legendary', 'Mythic'], max_price: 100000 },
+    created_at: '2026-07-01T09:00:00Z',
+    last_notified_at: '2026-07-02T10:05:00Z',
+  },
+  {
+    id: 'ss-2',
+    user_id: currentUser.id,
+    query: '',
+    filters: { category_id: 'cat-currency', server_region: 'EU-Kazzak', max_price: 50 },
+    created_at: '2026-06-20T18:30:00Z',
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Read accessors (thin stand-ins for the eventual API/DB layer).
+// ---------------------------------------------------------------------------
+export function getUserById(id?: string): User | undefined {
+  return mockUsers.find((u) => u.id === id);
+}
+
+export function getCategoryById(id?: string): Category | undefined {
+  return mockCategories.find((c) => c.id === id);
+}
+
+export function getListingById(id?: string): Listing | undefined {
+  return mockListings.find((l) => l.id === id);
+}
+
+export function getListingsBySeller(sellerId: string): Listing[] {
+  return mockListings
+    .filter((l) => l.seller_id === sellerId)
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+}
+
+export function getCommentsForListing(listingId: string): Comment[] {
+  return mockComments
+    .filter((c) => c.listing_id === listingId)
+    .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+}
+
+export function getReviewsForUser(userId: string): Review[] {
+  return mockReviews
+    .filter((r) => r.reviewed_id === userId)
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+}
+
+export function getConversationsForUser(userId: string): Conversation[] {
+  return mockConversations
+    .filter((c) => c.buyer_id === userId || c.seller_id === userId)
+    .sort((a, b) => {
+      const aLast = a.messages?.[a.messages.length - 1]?.created_at ?? a.created_at;
+      const bLast = b.messages?.[b.messages.length - 1]?.created_at ?? b.created_at;
+      return new Date(bLast).getTime() - new Date(aLast).getTime();
+    });
+}
+
+export function getConversationById(id: string): Conversation | undefined {
+  return mockConversations.find((c) => c.id === id);
+}
+
+/** Find the current user's conversation with a seller about a listing, creating one if needed. */
+export function findOrCreateConversation(
+  listingId: string,
+  sellerId: string,
+  buyer: User = currentUser,
+): Conversation {
+  const existing = mockConversations.find(
+    (c) => c.listing_id === listingId && c.buyer_id === buyer.id && c.seller_id === sellerId,
+  );
+  if (existing) return existing;
+
+  const conversation: Conversation = {
+    id: `conv-${Date.now()}`,
+    listing_id: listingId,
+    buyer_id: buyer.id,
+    seller_id: sellerId,
+    created_at: new Date().toISOString(),
+    listing: getListingById(listingId),
+    buyer,
+    seller: getUserById(sellerId),
+    messages: [],
+  };
+  mockConversations.unshift(conversation);
+  return conversation;
+}
+
+/** Look up a listing attribute value by key (e.g. 'rarity', 'level_req'). */
+export function getAttribute(listing: Listing, key: string): string | undefined {
+  return listing.attributes?.find((a) => a.attribute_key === key)?.attribute_value;
+}
+
+// ---------------------------------------------------------------------------
+// Mutations (in-memory only — reset on refresh, like the rest of the mock layer).
+// ---------------------------------------------------------------------------
+export function addComment(listingId: string, body: string, user: User = currentUser): Comment {
+  const comment: Comment = {
+    id: `comm-${Date.now()}`,
+    listing_id: listingId,
+    user_id: user.id,
+    body,
+    created_at: new Date().toISOString(),
+    user,
+  };
+  mockComments.push(comment);
+  return comment;
+}
+
+export function addMessage(conversationId: string, body: string, sender: User = currentUser): Message | undefined {
+  const conversation = getConversationById(conversationId);
+  if (!conversation) return undefined;
+  const message: Message = {
+    id: `m-${Date.now()}`,
+    conversation_id: conversationId,
+    sender_id: sender.id,
+    body,
+    created_at: new Date().toISOString(),
+  };
+  conversation.messages = [...(conversation.messages ?? []), message];
+  return message;
 }

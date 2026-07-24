@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Filter, X, ChevronDown, ChevronUp, RotateCcw } from 'lucide-react';
 import { mockCategories, mockCategoryAttributes } from '../mocks/data';
 import { Rarity } from '../types';
+import { RARITIES, getRarityBadgeStyle } from '../lib/rarity';
 
 interface FilterSidebarProps {
   selectedCategory: string;
@@ -70,22 +71,6 @@ export default function FilterSidebar({
       ...prev,
       [key]: value
     }));
-  };
-
-  const rarityList: Rarity[] = ['Common', 'Uncommon', 'Rare', 'Epic', 'Legendary', 'Mythic'];
-  
-  // Highlight border and text for rarity selection
-  const getRarityBadgeStyle = (rarity: Rarity, isChecked: boolean) => {
-    if (!isChecked) return 'border-game-border bg-game-card/50 text-gray-400 hover:border-gray-600';
-    switch (rarity.toLowerCase()) {
-      case 'common': return 'border-rarity-common bg-rarity-common/10 text-rarity-common font-bold';
-      case 'uncommon': return 'border-rarity-uncommon bg-rarity-uncommon/10 text-rarity-uncommon font-bold';
-      case 'rare': return 'border-rarity-rare bg-rarity-rare/10 text-rarity-rare font-bold';
-      case 'epic': return 'border-rarity-epic bg-rarity-epic/10 text-rarity-epic font-bold';
-      case 'legendary': return 'border-rarity-legendary bg-rarity-legendary/10 text-rarity-legendary font-bold';
-      case 'mythic': return 'border-rarity-mythic bg-rarity-mythic/10 text-rarity-mythic font-bold';
-      default: return 'border-blue-500 bg-blue-500/10 text-blue-400 font-bold';
-    }
   };
 
   const regions = [
@@ -184,7 +169,7 @@ export default function FilterSidebar({
           </button>
           {rarityOpen && (
             <div className="mt-3 grid grid-cols-2 gap-2 animate-fade-in">
-              {rarityList.map((rarity) => {
+              {RARITIES.map((rarity) => {
                 const isChecked = selectedRarities.includes(rarity);
                 return (
                   <button

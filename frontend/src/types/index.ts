@@ -112,7 +112,7 @@ export interface SavedSearch {
     max_price?: number;
     rarity?: Rarity[];
     server_region?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
   created_at: string;
   last_notified_at?: string;

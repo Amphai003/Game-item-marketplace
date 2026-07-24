@@ -4,17 +4,11 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Shield, MessageSquare, PlusCircle, User, Bell, Coins, Menu, X } from 'lucide-react';
-import { mockUsers } from '../mocks/data';
+import { currentUser } from '../mocks/data';
 
-interface NavbarProps {
-  onSearchChange?: (val: string) => void;
-  searchValue?: string;
-}
-
-export default function Navbar({ onSearchChange, searchValue }: NavbarProps) {
+export default function Navbar() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const currentUser = mockUsers[4]; // mock current user
 
   const navLinks = [
     { href: '/', label: 'Browse Items', icon: Shield },

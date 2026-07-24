@@ -4,6 +4,8 @@ import React from 'react';
 import Link from 'next/link';
 import { Star, MapPin, MessageSquare } from 'lucide-react';
 import { Listing } from '../types';
+import { getRarityConfig } from '../lib/rarity';
+import { getAttribute } from '../mocks/data';
 
 interface ListingCardProps {
   listing: Listing;
@@ -14,62 +16,11 @@ export default function ListingCard({ listing, onMessageSeller }: ListingCardPro
   const { id, title, description, price, currency, quantity, server_region, seller, category, attributes } = listing;
 
   // Retrieve rarity and other custom attributes
-  const rarity = attributes?.find(a => a.attribute_key === 'rarity')?.attribute_value || 'Common';
-  const levelReq = attributes?.find(a => a.attribute_key === 'level_req')?.attribute_value;
-  
+  const rarity = getAttribute(listing, 'rarity') || 'Common';
+  const levelReq = getAttribute(listing, 'level_req');
+
   // Custom metadata display based on categories
   const otherAttributes = attributes?.filter(a => a.attribute_key !== 'rarity' && a.attribute_key !== 'level_req') || [];
-
-  // Theme settings for rarity
-  const getRarityConfig = (rarity: string) => {
-    switch (rarity.toLowerCase()) {
-      case 'uncommon':
-        return {
-          border: 'border-rarity-uncommon hover:border-rarity-uncommon/70',
-          shadow: 'hover:shadow-glow-uncommon',
-          text: 'text-rarity-uncommon',
-          bg: 'bg-rarity-uncommon/10',
-        };
-      case 'rare':
-        return {
-          border: 'border-rarity-rare hover:border-rarity-rare/70',
-          shadow: 'hover:shadow-glow-rare',
-          text: 'text-rarity-rare',
-          bg: 'bg-rarity-rare/10',
-        };
-      case 'epic':
-        return {
-          border: 'border-rarity-epic hover:border-rarity-epic/70',
-          shadow: 'hover:shadow-glow-epic',
-          text: 'text-rarity-epic',
-          bg: 'bg-rarity-epic/10',
-        };
-      case 'legendary':
-        return {
-          border: 'border-rarity-legendary hover:border-rarity-legendary/70',
-          shadow: 'hover:shadow-glow-legendary',
-          text: 'text-rarity-legendary',
-          bg: 'bg-rarity-legendary/10',
-          glow: 'animate-pulse-glow',
-        };
-      case 'mythic':
-        return {
-          border: 'border-rarity-mythic hover:border-rarity-mythic/70',
-          shadow: 'hover:shadow-glow-mythic',
-          text: 'text-rarity-mythic',
-          bg: 'bg-rarity-mythic/10',
-          glow: 'animate-pulse-glow',
-        };
-      case 'common':
-      default:
-        return {
-          border: 'border-game-border hover:border-gray-600',
-          shadow: 'hover:shadow-glow-common',
-          text: 'text-gray-400',
-          bg: 'bg-game-border/30',
-        };
-    }
-  };
 
   const rarityConf = getRarityConfig(rarity);
   const defaultImage = 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&q=80';
@@ -221,7 +172,7 @@ export default function ListingCard({ listing, onMessageSeller }: ListingCardPro
       <div className="p-3 bg-game-dark/95 border-t border-game-border flex items-center justify-between gap-2 transform translate-y-full transition-transform duration-300 group-hover:translate-y-0 absolute bottom-0 left-0 w-full z-10 backdrop-blur-sm">
         <Link
           href={`/listing/${id}`}
-          className="flex-1 text-center py-2 rounded bg-game-border text-xs font-bold text-white hover:bg-game-borderHover transition-colors border border-blue-500/20"
+          className="flex-1 text-center py-2 rounded bg-game-border text-xs font-bold text-white hover:bg-game-cardHover transition-colors border border-blue-500/20"
         >
           View Specs
         </Link>

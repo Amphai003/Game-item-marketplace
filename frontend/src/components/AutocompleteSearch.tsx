@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, X, Loader, ArrowRight } from 'lucide-react';
-import { mockListings, mockCategories, mockUsers } from '../mocks/data';
+import { mockListings, mockCategories, mockUsers, getAttribute } from '../mocks/data';
+import { getRarityTextColor } from '../lib/rarity';
 
 interface AutocompleteSearchProps {
   onSearch: (query: string) => void;
@@ -74,7 +75,7 @@ export default function AutocompleteSearch({ onSearch, defaultValue = '', placeh
         .filter(l => l.title.toLowerCase().includes(q) || (l.description && l.description.toLowerCase().includes(q)))
         .slice(0, 5)
         .map(l => {
-          const rarity = l.attributes?.find(a => a.attribute_key === 'rarity')?.attribute_value;
+          const rarity = getAttribute(l, 'rarity');
           return {
             id: `item-${l.id}`,
             type: 'item' as const,
@@ -144,20 +145,6 @@ export default function AutocompleteSearch({ onSearch, defaultValue = '', placeh
     onSearch('');
   };
 
-  // Helper to color coder rarity inside autocomplete list
-  const getRarityColor = (rarity?: string) => {
-    if (!rarity) return 'text-gray-400';
-    switch (rarity.toLowerCase()) {
-      case 'common': return 'text-rarity-common';
-      case 'uncommon': return 'text-rarity-uncommon';
-      case 'rare': return 'text-rarity-rare';
-      case 'epic': return 'text-rarity-epic';
-      case 'legendary': return 'text-rarity-legendary';
-      case 'mythic': return 'text-rarity-mythic';
-      default: return 'text-gray-400';
-    }
-  };
-
   return (
     <div ref={containerRef} className="relative w-full max-w-2xl">
       <div className="relative flex items-center">
@@ -178,6 +165,7 @@ export default function AutocompleteSearch({ onSearch, defaultValue = '', placeh
           onFocus={() => setIsOpen(suggestions.length > 0)}
           placeholder={placeholder}
           aria-expanded={isOpen}
+          aria-controls="search-suggestions"
           aria-autocomplete="list"
           role="combobox"
           className="w-full rounded-lg border border-game-border bg-game-card/90 py-3.5 pl-12 pr-12 text-sm text-white placeholder-gray-500 shadow-inner transition-all focus:border-blue-500 focus:bg-game-card focus:shadow-glow-rare focus:ring-1 focus:ring-blue-500"
@@ -205,6 +193,7 @@ export default function AutocompleteSearch({ onSearch, defaultValue = '', placeh
       {/* Suggestion Dropdown */}
       {isOpen && (
         <ul
+          id="search-suggestions"
           role="listbox"
           aria-label="Search suggestions"
           className="absolute left-0 mt-2 w-full z-40 rounded-lg border border-game-border bg-game-dark/95 backdrop-blur-md p-1 shadow-2xl overflow-y-auto max-h-80 divide-y divide-game-border/30 animate-slide-down"
@@ -224,7 +213,7 @@ export default function AutocompleteSearch({ onSearch, defaultValue = '', placeh
               >
                 <div className="flex flex-col">
                   <div className="flex items-center gap-2">
-                    <span className={`text-sm font-semibold truncate ${suggestion.type === 'item' ? getRarityColor(suggestion.rarity) : ''}`}>
+                    <span className={`text-sm font-semibold truncate ${suggestion.type === 'item' ? getRarityTextColor(suggestion.rarity) : ''}`}>
                       {suggestion.text}
                     </span>
                     {suggestion.categoryName && (

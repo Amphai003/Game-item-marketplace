@@ -5,11 +5,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import Navbar from '../../components/Navbar';
-import { addListing, mockCategories, mockUsers } from '../../mocks/data';
+import { addListing, mockCategories, currentUser } from '../../mocks/data';
 
 export default function CreateListingPage() {
   const router = useRouter();
-  const currentUser = mockUsers[4] ?? mockUsers[0];
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [categoryId, setCategoryId] = useState(mockCategories[0]?.id || '');

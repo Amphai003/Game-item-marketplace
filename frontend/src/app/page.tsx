@@ -7,7 +7,8 @@ import FilterSidebar from '../components/FilterSidebar';
 import ListingCard from '../components/ListingCard';
 import { searchListings, mockCategories } from '../mocks/data';
 import { SlidersHorizontal, ArrowUpDown, X, Bell, Sparkles } from 'lucide-react';
-import { Listing } from '../types';
+
+type SortOption = 'relevance' | 'price_asc' | 'price_desc' | 'newest';
 
 export default function BrowsePage() {
   // Search and Filter states
@@ -17,7 +18,7 @@ export default function BrowsePage() {
   const [minPrice, setMinPrice] = useState<number | undefined>(undefined);
   const [maxPrice, setMaxPrice] = useState<number | undefined>(undefined);
   const [selectedRegion, setSelectedRegion] = useState('all');
-  const [sortOption, setSortOption] = useState<'relevance' | 'price_asc' | 'price_desc' | 'newest'>('relevance');
+  const [sortOption, setSortOption] = useState<SortOption>('relevance');
   const [dynamicAttributes, setDynamicAttributes] = useState<Record<string, string>>({});
   
   // UI states
@@ -204,7 +205,7 @@ export default function BrowsePage() {
               <select
                 id="sort-select"
                 value={sortOption}
-                onChange={(e) => setSortOption(e.target.value as any)}
+                onChange={(e) => setSortOption(e.target.value as SortOption)}
                 className="appearance-none rounded-lg border border-game-border bg-game-card py-2.5 pl-4 pr-10 text-xs font-bold text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none cursor-pointer"
               >
                 <option value="relevance">Relevance</option>
