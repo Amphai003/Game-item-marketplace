@@ -134,3 +134,24 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trg_listings_updated_at
 BEFORE UPDATE ON listings
 FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+-- Roles & Permissions: simple RBAC tables
+CREATE TABLE roles (
+  id   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT UNIQUE NOT NULL
+);
+
+CREATE TABLE user_roles (
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  role_id UUID NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
+  PRIMARY KEY (user_id, role_id)
+);
+
+-- Seed common roles
+INSERT INTO roles (id, name)
+VALUES
+  (gen_random_uuid(), 'admin'),
+  (gen_random_uuid(), 'user')
+ON CONFLICT DO NOTHING;
+
+-- Note: Assigning an initial admin user should be done via application seed tooling.

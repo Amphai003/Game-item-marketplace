@@ -511,3 +511,7 @@ export function searchListings(params: SearchParams): Listing[] {
 
   return results;
 }
+
+export function addListing(listing: Listing) {
+  mockListings.unshift(listing);
+}

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Star, MapPin, Tag, User, MessageSquare, ShieldAlert } from 'lucide-react';
+import { Star, MapPin, MessageSquare } from 'lucide-react';
 import { Listing } from '../types';
 
 interface ListingCardProps {
@@ -72,7 +72,10 @@ export default function ListingCard({ listing, onMessageSeller }: ListingCardPro
   };
 
   const rarityConf = getRarityConfig(rarity);
-  const primaryImage = listing.images?.[0]?.url || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&q=80';
+  const defaultImage = 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&q=80';
+  const imageCount = listing.images?.length ?? 0;
+  const imagesToShow = listing.images?.slice(0, 4) ?? [];
+  const hasMultipleImages = imageCount > 1;
 
   return (
     <div
@@ -84,13 +87,36 @@ export default function ListingCard({ listing, onMessageSeller }: ListingCardPro
         {(rarity.toLowerCase() === 'legendary' || rarity.toLowerCase() === 'mythic') && (
           <div className={`absolute inset-0 opacity-20 bg-gradient-to-t from-transparent to-current ${rarityConf.text}`}></div>
         )}
-        
-        <img
-          src={primaryImage}
-          alt={title}
-          loading="lazy"
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
+
+        {hasMultipleImages ? (
+          <div className="grid h-full w-full grid-cols-2 grid-rows-2 gap-1">
+            {imagesToShow.map((image, index) => (
+              <div key={image.id || index} className="relative overflow-hidden">
+                <img
+                  src={image.url}
+                  alt={`${title} image ${index + 1}`}
+                  loading="lazy"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                {index === 3 && imageCount > 4 && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/55 text-white text-sm font-semibold">
+                    +{imageCount - 4}
+                  </div>
+                )}
+              </div>
+            ))}
+            {imagesToShow.length < 4 && Array.from({ length: 4 - imagesToShow.length }).map((_, placeholderIndex) => (
+              <div key={`placeholder-${placeholderIndex}`} className="bg-game-dark/80"></div>
+            ))}
+          </div>
+        ) : (
+          <img
+            src={listing.images?.[0]?.url || defaultImage}
+            alt={title}
+            loading="lazy"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        )}
 
         {/* Badges on Image */}
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-10">
